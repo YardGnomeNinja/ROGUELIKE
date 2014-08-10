@@ -12,7 +12,7 @@ COPY "D:\Source\Libraries\Phaser\build\phaser.js" "c:\wamp\www\roguelike" /Y
 COPY "D:\Source\Libraries\Phaser\build\phaser.min.js" "c:\wamp\www\roguelike" /Y
 
 COPY "D:\Source\Projects\roguelike\index.html" "c:\wamp\www\roguelike" /Y
-COPY "D:\Source\Projects\roguelike\roguelike.js" "c:\wamp\www\roguelike" /Y
+COPY "D:\Source\Projects\roguelike\*.js" "c:\wamp\www\roguelike" /Y
 COPY "D:\Source\Projects\roguelike\*.png" "c:\wamp\www\roguelike\tiles" /Y
 COPY "D:\Source\Projects\roguelike\*.jsona" "c:\wamp\www\roguelike\tiles" /Y
 
