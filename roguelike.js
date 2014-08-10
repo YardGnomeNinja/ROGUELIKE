@@ -10,15 +10,14 @@ function preload () {
 
 function create () {
 	initBackground();
-	initMap();
+	initMaps();
 	initPlayer();	
 	initInput();
-	drawDebugConsole();
+	initDebugConsole();
 }
 
 function update () {
-	
-	//drawPlayer();
+	updateDebugConsole();
 }
 
 function initBackground() {
@@ -85,43 +84,143 @@ function initInput() {
 }
 
 function playerMoveUp(key) {
-	player.y -= 12;
+	newY = player.y - 1;
+	newX = player.x;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.y--;
+		playerSprite.y -= 12;
+	}
 }
 
 function playerMoveDown(key) {
-	player.y += 12;
+	newY = player.y + 1;
+	newX = player.x;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.y++;
+		playerSprite.y += 12;
+	}
 }
 
 function playerMoveLeft(key) {
-	player.x -= 12;
+	newY = player.y;
+	newX = player.x - 1;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.x--;
+		playerSprite.x -= 12;
+	}
 }
 
 function playerMoveRight(key) {
-	player.x += 12;
+	newY = player.y;
+	newX = player.x + 1;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.x++;
+		playerSprite.x += 12;
+	}
 }
 
 function playerMoveUpLeft(key) {
-	player.y -= 12;
-	player.x -= 12;
+	newY = player.y - 1;
+	newX = player.x - 1;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.x--;
+		player.y--;
+		playerSprite.y -= 12;
+		playerSprite.x -= 12;
+	}
 }
 
 function playerMoveUpRight(key) {
-	player.y -= 12;
-	player.x += 12;
+	newY = player.y - 1;
+	newX = player.x + 1;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.x++;
+		player.y--;
+		playerSprite.y -= 12;
+		playerSprite.x += 12;
+	}
 }
 
 function playerMoveDownLeft(key) {
-	player.y += 12;
-	player.x -= 12;
+	newY = player.y + 1;
+	newX = player.x - 1;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.x--;
+		player.y++;
+		playerSprite.y += 12;
+		playerSprite.x -= 12;
+	}
 }
 
 function playerMoveDownRight(key) {
-	player.y += 12;
-	player.x += 12;
+	newY = player.y + 1;
+	newX = player.x + 1;
+	
+	var newDungeonSpace = dungeonMap[newY][newX];
+	
+	if(newDungeonSpace.passable === 1)
+	{
+		// Empty the current space and move the reference to the player to the new space
+		creatureMap[player.y][player.x] = "undefined";
+		creatureMap[newY][newX] = player;
+		player.x++;
+		player.y++;
+		playerSprite.y += 12;
+		playerSprite.x += 12;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// MAP //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MAPS /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Vars ////////////////////////////////////////////////////
@@ -136,14 +235,17 @@ var map_max_room_width = 10;
 
 var map_max_room_count = 30;
 
-var map;
+var dungeonMap;
+var creatureMap;
+var fovMap;
+var itemMap;
 
 // Prototype Constructors ///////////////////////////////////////
 
 function room(name, rect) {
 	this.name = (typeof name === "undefined") ? 'room' : name;
 	this.rect = rect;
-	this.center = [this.rect.x + (this.rect.width / 2), this.rect.y + (this.rect.height / 2)];
+	this.center = [this.rect.x + Phaser.Math.ceil(this.rect.width / 2), this.rect.y + Phaser.Math.ceil(this.rect.height / 2)];
 }
 
 // Objects ////////////////////////////////////////////////////
@@ -154,17 +256,24 @@ var room1;
 
 // Functions ////////////////////////////////////////////////////
 
-function initMap() {
-	// initialize the map as a two-dimensional array since JavaScript is weird and I'm bitter about it
-	map = new Array(map_max_height);
+function initMaps() {
+	// initialize the dungeonMap as a two-dimensional array since JavaScript is weird and I'm bitter about it
+	dungeonMap = new Array(map_max_height);
 	
 	for(var y = 0; y < map_max_height; y++)
 	{
-		map[y] = new Array(map_max_width);
+		dungeonMap[y] = new Array(map_max_width);
 	}
-	
 
-	// fill the map with walls we'll carve from
+	// initialize the creatureMap as a two-dimensional array since JavaScript is weird and I'm still bitter about it
+	creatureMap = new Array(map_max_height);
+	
+	for(var y = 0; y < map_max_height; y++)
+	{
+		creatureMap[y] = new Array(map_max_width);
+	}
+
+	// fill the dungeonMap with walls we'll carve from
 	for(var y = 0; y < map_max_height; y++)
 	{
 		for(var x = 0; x < map_max_width; x++)
@@ -172,20 +281,20 @@ function initMap() {
 			map_wall.x = x;
 			map_wall.y = y;
 			
-			map[y][x] = map_wall;
+			dungeonMap[y][x] = map_wall;
 		}
 	}
 	
 	// Create a room
 	createRoom();
 	
-	// Draw the map
+	// Draw the dungeonMap
 	for(var y = 0; y < map_max_height; y++)
 	{
 		for(var x = 0; x < map_max_width; x++)
 		{
 			// Get the map_space at this location
-			var thisSpace = map[y][x];
+			var thisSpace = dungeonMap[y][x];
 
 			// Draw the map_space sprite
 			game.add.sprite(x * thisSpace.width, y * thisSpace.height, 'tiles', thisSpace.sprite);
@@ -216,7 +325,7 @@ function carveRoom(newRoom) {
 			map_floor.x = x;
 			map_floor.y = y;
 			
-			map[y][x] = map_floor;
+			dungeonMap[y][x] = map_floor;
 		}
 	}
 }
@@ -225,20 +334,43 @@ function carveRoom(newRoom) {
 // PLAYER ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// Vars ////////////////////////////////////////////////////
+
 var player;
+var playerSprite
+
+// Prototype Constructors ///////////////////////////////////////
+
+function playerObject(x, y) {
+	this.x = (typeof x === "undefined") ? 0 : x;
+	this.y = (typeof y === "undefined") ? 0 : y;
+}
 
 function initPlayer() {
-	player = game.add.sprite(room1.center[0] * default_tile_width, room1.center[1] * default_tile_height, 'tiles', 1);
-	player.anchor.setTo(0, 0);
-	//player.tint = 0xff00ff;
+	playerSprite = game.add.sprite(room1.center[0] * default_tile_width, room1.center[1] * default_tile_height, 'tiles', 1);
+	playerSprite.anchor.setTo(0, 0);
+	//playerSprite.tint = 0xff00ff;
+	
+	player = new playerObject(room1.center[0], room1.center[1]);
+	
+	creatureMap[room1.center[1]][room1.center[0]] = player;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DEBUG ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function drawDebugConsole() {
+// Vars ////////////////////////////////////////////////////
+var debugLine1, debugLine2;
+
+function initDebugConsole() {
 	var style = { font: "14px Courier New", fill: "#ff0044", align: "center" };
 
-    game.add.text(32, 30, 'Room 1 Dimensions: x:' + room1.rect.x + ', y:' + room1.rect.y + ', w:' + room1.rect.width + ', h:' + room1.rect.height, style);
+    debugLine1 = game.add.text(32, 30, 'Player location: x:' + player.x + ', y:' + player.y, style);
+    debugLine2 = game.add.text(32, 44, 'Room 1 Dimensions: x:' + room1.rect.x + ', y:' + room1.rect.y + ', w:' + room1.rect.width + ', h:' + room1.rect.height, style);
+}
+
+function updateDebugConsole() {
+    debugLine1.setText('Player location: x:' + player.x + ', y:' + player.y);
+    debugLine2.setText('Room 1 Dimensions: x:' + room1.rect.x + ', y:' + room1.rect.y + ', w:' + room1.rect.width + ', h:' + room1.rect.height);
 }
