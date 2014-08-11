@@ -5,10 +5,13 @@
 var game = new Phaser.Game(1024, 768, Phaser.AUTO, 'Rogue-like', { preload: preload, create: create, update: update });
 
 function preload () {
-	 game.load.atlasJSONHash('tiles', 'tiles/default.png', 'tiles/default.jsona');
+	 game.load.atlasJSONHash('sprites', 'sprites/default.png', 'sprites/default.jsona');
 }
 
 function create () {
+	game.world.setBounds(0, 0, 1200, 1200);
+	game.stage.smoothed = false;
+
 	initBackground();
 	initMaps();
 	initPlayer();	
@@ -297,7 +300,7 @@ function initMaps() {
 			var thisSpace = dungeonMap[y][x];
 
 			// Draw the map_space sprite
-			game.add.sprite(x * thisSpace.width, y * thisSpace.height, 'tiles', thisSpace.sprite);
+			game.add.sprite(x * thisSpace.width, y * thisSpace.height, 'sprites', thisSpace.sprite);
 		}
 	}
 }
@@ -347,9 +350,10 @@ function playerObject(x, y) {
 }
 
 function initPlayer() {
-	playerSprite = game.add.sprite(room1.center[0] * default_tile_width, room1.center[1] * default_tile_height, 'tiles', 1);
+	playerSprite = game.add.sprite(room1.center[0] * default_tile_width, room1.center[1] * default_tile_height, 'sprites', 1);
 	playerSprite.anchor.setTo(0, 0);
 	//playerSprite.tint = 0xff00ff;
+	game.camera.follow(playerSprite, Phaser.Camera.FOLLOW_TOPDOWN_TIGHT);
 	
 	player = new playerObject(room1.center[0], room1.center[1]);
 	
