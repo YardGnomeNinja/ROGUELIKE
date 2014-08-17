@@ -41,15 +41,12 @@ function playerMoveUp(key) {
 	newY = game.player.y - 1;
 	newX = game.player.x;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.y--;
-		game.playerSprite.y -= 12;
+		game.player.sprite.y -= 12;
 	}
 }
 
@@ -57,15 +54,12 @@ function playerMoveDown(key) {
 	newY = game.player.y + 1;
 	newX = game.player.x;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.y++;
-		game.playerSprite.y += 12;
+		game.player.sprite.y += 12;
 	}
 }
 
@@ -73,15 +67,12 @@ function playerMoveLeft(key) {
 	newY = game.player.y;
 	newX = game.player.x - 1;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.x--;
-		game.playerSprite.x -= 12;
+		game.player.sprite.x -= 12;
 	}
 }
 
@@ -89,15 +80,12 @@ function playerMoveRight(key) {
 	newY = game.player.y;
 	newX = game.player.x + 1;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.x++;
-		game.playerSprite.x += 12;
+		game.player.sprite.x += 12;
 	}
 }
 
@@ -105,17 +93,14 @@ function playerMoveUpLeft(key) {
 	newY = game.player.y - 1;
 	newX = game.player.x - 1;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.x--;
 		game.player.y--;
-		game.playerSprite.y -= 12;
-		game.playerSprite.x -= 12;
+		game.player.sprite.y -= 12;
+		game.player.sprite.x -= 12;
 	}
 }
 
@@ -123,17 +108,14 @@ function playerMoveUpRight(key) {
 	newY = game.player.y - 1;
 	newX = game.player.x + 1;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.x++;
 		game.player.y--;
-		game.playerSprite.y -= 12;
-		game.playerSprite.x += 12;
+		game.player.sprite.y -= 12;
+		game.player.sprite.x += 12;
 	}
 }
 
@@ -141,17 +123,14 @@ function playerMoveDownLeft(key) {
 	newY = game.player.y + 1;
 	newX = game.player.x - 1;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.x--;
 		game.player.y++;
-		game.playerSprite.y += 12;
-		game.playerSprite.x -= 12;
+		game.player.sprite.y += 12;
+		game.player.sprite.x -= 12;
 	}
 }
 
@@ -159,16 +138,13 @@ function playerMoveDownRight(key) {
 	newY = game.player.y + 1;
 	newX = game.player.x + 1;
 	
-	var newDungeonSpace = game.map.dungeonMap[newY][newX];
+	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
-	if(newDungeonSpace.passable === 1)
+	if(newSpace.tile.passable)
 	{
-		// Empty the current space and move the reference to the player to the new space
-		game.map.creatureMap[game.player.y][game.player.x] = "undefined";
-		game.map.creatureMap[newY][newX] = game.player;
 		game.player.x++;
 		game.player.y++;
-		game.playerSprite.y += 12;
-		game.playerSprite.x += 12;
+		game.player.sprite.y += 12;
+		game.player.sprite.x += 12;
 	}
 }

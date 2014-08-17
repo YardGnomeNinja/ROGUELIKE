@@ -13,10 +13,12 @@ function create () {
 	game.stage.smoothed = false;
 
 	initBackground();
-	initMaps();
+	initMap();
 	initPlayer();	
 	initInput();
-	initDebugConsole();
+	
+	// Draw the first floor
+	drawFloor(0);
 }
 
 function update () {
@@ -26,7 +28,7 @@ function update () {
 function render() {
 	game.debug.renderShadow = false;
 	game.debug.cameraInfo(game.camera, 32, 32, '#FF0000');
-    game.debug.spriteCoords(game.playerSprite, 32, 500, '#FF0000')
+    game.debug.spriteCoords(game.player.sprite, 32, 500, '#FF0000')
 }
 
 function initBackground() {
