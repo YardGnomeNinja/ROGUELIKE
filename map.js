@@ -44,6 +44,7 @@ function initMapPrototypes() {
 		this.__proto__ = new Object();
 		this.name = (typeof name === "undefined") ? 'room' : name;
 		this.rect = rect;
+		this.connected = false;
 	}
 
 	game.map.tile = function (name, width, height, sprite, passable, blocksFOV) {
@@ -104,11 +105,15 @@ function generateFloor(index) {
 function generateRooms(newFloor) {
 	// Create rooms
 	var numberofRooms = game.rnd.integerInRange(game.map.max_room_count / 2, game.map.max_room_count);
+	var roomArray = [];
 	
 	for(i = 0; i < numberofRooms; i++)
 	{
-		generateRoom(newFloor);
+		roomArray[i] = generateRoom(newFloor);
 	}
+	
+	// Create connections between
+	generateHallways(newFloor, roomArray);
 }
 
 function generateRoom(newFloor) {
@@ -123,6 +128,8 @@ function generateRoom(newFloor) {
 	var newRoom = new game.map.room('A room', rect);
 	
 	carveRoom(newFloor, newRoom);
+	
+	return newRoom;
 }
 
 function carveRoom(newFloor, newRoom) {
@@ -134,6 +141,98 @@ function carveRoom(newFloor, newRoom) {
 			newFloor[x][y].tile = new game.map.groundTile(x, y);
 		}
 	}
+}
+
+function generateHallways(newFloor, roomArray) {
+	// Iterate the rooms
+	for(var i = 0; i < roomArray.length; i++)
+	{
+		var roomA = roomArray[i];
+		
+		// If room.connected == false OR 33% chance	
+		if(!roomA.connected || (game.rnd.integerInRange(1, 100) <= 33))
+		{
+			// Random generate a number between 0 and roomArray.length - 1 until it is not the same as the current iteration counter
+			var randomRoomIndex = i;
+			while(randomRoomIndex == i) {
+				randomRoomIndex = game.rnd.integerInRange(0, roomArray.length - 1);
+			}
+				
+			var roomB = roomArray[randomRoomIndex];
+		
+			// Carve a hallway from roomA to roomB
+			carveHallway(newFloor, roomA, roomB);
+		}
+	}
+}
+
+function carveHallway(newFloor, roomA, roomB) {
+	// Pick a random point inside the rect in roomA and in roomB
+	var roomAPoint = new Phaser.Point(game.rnd.integerInRange(roomA.rect.x, roomA.rect.x + roomA.rect.width), game.rnd.integerInRange(roomA.rect.y, roomA.rect.y + roomA.rect.height));
+	var roomBPoint = new Phaser.Point(game.rnd.integerInRange(roomB.rect.x, roomB.rect.x + roomB.rect.width), game.rnd.integerInRange(roomB.rect.y, roomB.rect.y + roomB.rect.height));
+
+ 	// Pick a random number, 1 - 5 = generate x path first, 6 - 10 = generate y path first
+	var firstDirection = game.rnd.integerInRange(1, 10);
+
+	if(firstDirection <= 5)
+	{
+		var xStart = (roomAPoint.x <= roomBPoint.x) ? roomAPoint.x : roomBPoint.x;
+		var xEnd = (roomAPoint.x >= roomBPoint.x) ? roomAPoint.x : roomBPoint.x;
+		var yStart = (roomAPoint.y <= roomBPoint.y) ? roomAPoint.y : roomBPoint.y;
+		var yEnd = (roomAPoint.y >= roomBPoint.y) ? roomAPoint.y : roomBPoint.y;
+		
+		// Carve X
+ 		for(var x = xStart; x <= xEnd; x++)
+		{
+			newFloor[x][yStart].tile = new game.map.groundTile(x, yStart);
+		}
+		
+		// Carve Y from end of X
+ 		for(var y = yStart; y <= yEnd; y++)
+		{
+			newFloor[xEnd][y].tile = new game.map.groundTile(xEnd, y);
+		}
+ 	}
+	else
+	{
+/*		// carve y first
+		if(roomAPoint.y <= roomBPoint.y)
+		{
+			var startRoomPoint = roomAPoint;
+			var endRoomPoint = roomBPoint;
+		}
+		else
+		{
+			var startRoomPoint = roomBPoint;
+			var endRoomPoint = roomAPoint;
+		}
+
+ 		for(var y = startRoomPoint.y; y <= endRoomPoint.y; y++)
+		{
+			newFloor[startRoomPoint.x][y].tile = new game.map.groundTile(startRoomPoint.x, y);
+		}
+
+		// carve x next
+		if(roomAPoint.x <= roomBPoint.x)
+		{
+			var startRoomPoint = roomAPoint;
+			var endRoomPoint = roomBPoint;
+		}
+		else
+		{
+			var startRoomPoint = roomBPoint;
+			var endRoomPoint = roomAPoint;
+		}
+		
+ 		for(var x = startRoomPoint.x; x <= endRoomPoint.x; x++)
+		{
+			newFloor[x][startRoomPoint.y].tile = new game.map.groundTile(x, startRoomPoint.y);
+		}
+*/ 	}
+	
+	// Set connected to true for each room
+	roomA.connected = true;
+	roomB.connected = true;
 }
 
 function drawFloor(index)
