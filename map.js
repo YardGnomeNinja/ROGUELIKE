@@ -109,14 +109,14 @@ function generateRooms(newFloor) {
 	
 	for(i = 0; i < numberofRooms; i++)
 	{
-		roomArray[i] = generateRoom(newFloor);
+		roomArray[i] = generateRoom(newFloor, i);
 	}
 	
 	// Create connections between
 	generateHallways(newFloor, roomArray);
 }
 
-function generateRoom(newFloor) {
+function generateRoom(newFloor, roomNumber) {
 	// Limit the carvable area to one space around the entire perimeter
 	var randx = game.rnd.integerInRange(1, game.map.max_width - game.map.max_room_width - 1);
 	var randy = game.rnd.integerInRange(1, game.map.max_height - game.map.max_room_height - 1);
@@ -125,8 +125,8 @@ function generateRoom(newFloor) {
 	
 	var rect = new Phaser.Rectangle(randx, randy, randwidth, randheight);
 	
-	var newRoom = new game.map.room('A room', rect);
-	
+	var newRoom = new game.map.room('Room ' + roomNumber, rect);
+
 	carveRoom(newFloor, newRoom);
 	
 	return newRoom;
@@ -134,9 +134,9 @@ function generateRoom(newFloor) {
 
 function carveRoom(newFloor, newRoom) {
 	// Fill the rectangle with floors
-	for(var x = newRoom.rect.x; x < (newRoom.rect.x + newRoom.rect.width); x++)
+	for(var x = newRoom.rect.x; x <= (newRoom.rect.x + newRoom.rect.width); x++)
 	{
-		for(var y = newRoom.rect.y; y < (newRoom.rect.y + newRoom.rect.height); y++)
+		for(var y = newRoom.rect.y; y <= (newRoom.rect.y + newRoom.rect.height); y++)
 		{
 			newFloor[x][y].tile = new game.map.groundTile(x, y);
 		}
@@ -148,7 +148,7 @@ function generateHallways(newFloor, roomArray) {
 	for(var i = 0; i < roomArray.length; i++)
 	{
 		var roomA = roomArray[i];
-		
+
 		// If room.connected == false OR 33% chance	
 		if(!roomA.connected || (game.rnd.integerInRange(1, 100) <= 33))
 		{
@@ -173,66 +173,79 @@ function carveHallway(newFloor, roomA, roomB) {
 
  	// Pick a random number, 1 - 5 = generate x path first, 6 - 10 = generate y path first
 	var firstDirection = game.rnd.integerInRange(1, 10);
-
+	
 	if(firstDirection <= 5)
 	{
-		var xStart = (roomAPoint.x <= roomBPoint.x) ? roomAPoint.x : roomBPoint.x;
-		var xEnd = (roomAPoint.x >= roomBPoint.x) ? roomAPoint.x : roomBPoint.x;
-		var yStart = (roomAPoint.y <= roomBPoint.y) ? roomAPoint.y : roomBPoint.y;
-		var yEnd = (roomAPoint.y >= roomBPoint.y) ? roomAPoint.y : roomBPoint.y;
-		
-		// Carve X
- 		for(var x = xStart; x <= xEnd; x++)
+		if(roomAPoint.x <= roomBPoint.x)
 		{
-			newFloor[x][yStart].tile = new game.map.groundTile(x, yStart);
+			carveRight(newFloor, roomAPoint, roomBPoint);		
+		}
+		else
+		{
+			carveLeft(newFloor, roomAPoint, roomBPoint);
 		}
 		
-		// Carve Y from end of X
- 		for(var y = yStart; y <= yEnd; y++)
+		if(roomAPoint.y <= roomBPoint.y)
 		{
-			newFloor[xEnd][y].tile = new game.map.groundTile(xEnd, y);
+			carveDown(newFloor, roomAPoint, roomBPoint);
 		}
+		else
+		{
+			carveUp(newFloor, roomAPoint, roomBPoint);
+		}		
  	}
 	else
 	{
-/*		// carve y first
 		if(roomAPoint.y <= roomBPoint.y)
 		{
-			var startRoomPoint = roomAPoint;
-			var endRoomPoint = roomBPoint;
+			carveDown(newFloor, roomAPoint, roomBPoint);
 		}
 		else
 		{
-			var startRoomPoint = roomBPoint;
-			var endRoomPoint = roomAPoint;
-		}
+			carveUp(newFloor, roomAPoint, roomBPoint);
+		}		
 
- 		for(var y = startRoomPoint.y; y <= endRoomPoint.y; y++)
-		{
-			newFloor[startRoomPoint.x][y].tile = new game.map.groundTile(startRoomPoint.x, y);
-		}
-
-		// carve x next
 		if(roomAPoint.x <= roomBPoint.x)
 		{
-			var startRoomPoint = roomAPoint;
-			var endRoomPoint = roomBPoint;
+			carveRight(newFloor, roomAPoint, roomBPoint);		
 		}
 		else
 		{
-			var startRoomPoint = roomBPoint;
-			var endRoomPoint = roomAPoint;
+			carveLeft(newFloor, roomAPoint, roomBPoint);
 		}
-		
- 		for(var x = startRoomPoint.x; x <= endRoomPoint.x; x++)
-		{
-			newFloor[x][startRoomPoint.y].tile = new game.map.groundTile(x, startRoomPoint.y);
-		}
-*/ 	}
+	}
 	
 	// Set connected to true for each room
 	roomA.connected = true;
 	roomB.connected = true;
+}
+
+function carveUp(floor, pointA, pointB) {
+	for(var y = pointA.y; y >= pointB.y; y--)
+	{
+		floor[pointB.x][y].tile = new game.map.groundTile(pointB.x, y);
+	}
+}
+
+function carveDown(floor, pointA, pointB) {
+	for(var y = pointA.y; y <= pointB.y; y++)
+	{
+		floor[pointB.x][y].tile = new game.map.groundTile(pointB.x, y);
+	}
+}
+
+function carveLeft(floor, pointA, pointB) {
+	for(var x = pointA.x; x >= pointB.x; x--)
+	{
+		floor[x][pointA.y].tile = new game.map.groundTile(x, pointA.y);
+	}
+}
+
+function carveRight(floor, pointA, pointB) {
+	for(var x = pointA.x; x <= pointB.x; x++)
+	{
+		floor[x][pointA.y].tile = new game.map.groundTile(x, pointA.y);
+	}
 }
 
 function drawFloor(index)
@@ -246,7 +259,9 @@ function drawFloor(index)
 			var thisSpaceTile = game.map.floors[index][x][y].tile;
 
 			// Draw the tile sprite
-			game.add.sprite(x * thisSpaceTile.width, y * thisSpaceTile.height, 'sprites', thisSpaceTile.sprite);
+			var newTileSprite = game.add.sprite(x * thisSpaceTile.width, y * thisSpaceTile.height, 'sprites', thisSpaceTile.sprite);
+			newTileSprite.inputEnabled = true;
+			newTileSprite.events.onInputDown.add(onTileSpriteClick, this);
 		}
 	}	
 }

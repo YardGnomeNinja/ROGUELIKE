@@ -37,6 +37,10 @@ function initInput() {
 	game.keys.numpad3.onDown.add(playerMoveDownRight, this);
 }
 
+function onTileSpriteClick(event, sprite) {
+	window.alert(event.x / game.map.tiles.default_width + "," + event.y / game.map.tiles.default_width);
+}
+
 function playerMoveUp(key) {
 	newY = game.player.y - 1;
 	newX = game.player.x;
