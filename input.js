@@ -37,118 +37,139 @@ function initInput() {
 	game.keys.numpad3.onDown.add(playerMoveDownRight, this);
 }
 
-function onTileSpriteClick(event, sprite) {
-	window.alert(event.x / game.map.tiles.default_width + "," + event.y / game.map.tiles.default_width);
+function onTileSpriteClick(event, sprite) {	
+	var x = event.x / game.map.tiles.default_width;
+	var y = event.y / game.map.tiles.default_width
+	var spaceString = "";
+	var tileString = "";
+	
+	for(i in game.map.floors[game.player.floor][x][y])
+		spaceString += "\n" + i + " : " + game.map.floors[game.player.floor][x][y][i];
+	
+	window.alert(x + "," + y + "\n ---- SPACE ---- " + spaceString);
+
+	for(i in game.map.floors[game.player.floor][x][y].tile)
+		tileString += "\n" + i + " : " + game.map.floors[game.player.floor][x][y].tile[i];
+	
+	window.alert(x + "," + y + "\n ---- TILE ---- " + tileString);
 }
 
 function playerMoveUp(key) {
-	newY = game.player.y - 1;
-	newX = game.player.x;
+	newY = game.player.point.y - 1;
+	newX = game.player.point.x;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.y--;
+		game.player.point.y--;
 		game.player.sprite.y -= 12;
+		recalculateFOV(game.player.floor);
 	}
 }
 
 function playerMoveDown(key) {
-	newY = game.player.y + 1;
-	newX = game.player.x;
+	newY = game.player.point.y + 1;
+	newX = game.player.point.x;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.y++;
+		game.player.point.y++;
 		game.player.sprite.y += 12;
+		recalculateFOV(game.player.floor);
 	}
 }
 
 function playerMoveLeft(key) {
-	newY = game.player.y;
-	newX = game.player.x - 1;
+	newY = game.player.point.y;
+	newX = game.player.point.x - 1;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.x--;
+		game.player.point.x--;
 		game.player.sprite.x -= 12;
+		recalculateFOV(game.player.floor);
 	}
 }
 
 function playerMoveRight(key) {
-	newY = game.player.y;
-	newX = game.player.x + 1;
+	newY = game.player.point.y;
+	newX = game.player.point.x + 1;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.x++;
+		game.player.point.x++;
 		game.player.sprite.x += 12;
+		recalculateFOV(game.player.floor);
 	}
 }
 
 function playerMoveUpLeft(key) {
-	newY = game.player.y - 1;
-	newX = game.player.x - 1;
+	newY = game.player.point.y - 1;
+	newX = game.player.point.x - 1;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.x--;
-		game.player.y--;
+		game.player.point.x--;
+		game.player.point.y--;
 		game.player.sprite.y -= 12;
 		game.player.sprite.x -= 12;
+		recalculateFOV(game.player.floor);
 	}
 }
 
 function playerMoveUpRight(key) {
-	newY = game.player.y - 1;
-	newX = game.player.x + 1;
+	newY = game.player.point.y - 1;
+	newX = game.player.point.x + 1;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.x++;
-		game.player.y--;
+		game.player.point.x++;
+		game.player.point.y--;
 		game.player.sprite.y -= 12;
 		game.player.sprite.x += 12;
+		recalculateFOV(game.player.floor);
 	}
 }
 
 function playerMoveDownLeft(key) {
-	newY = game.player.y + 1;
-	newX = game.player.x - 1;
+	newY = game.player.point.y + 1;
+	newX = game.player.point.x - 1;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.x--;
-		game.player.y++;
+		game.player.point.x--;
+		game.player.point.y++;
 		game.player.sprite.y += 12;
 		game.player.sprite.x -= 12;
+		recalculateFOV(game.player.floor);
 	}
 }
 
 function playerMoveDownRight(key) {
-	newY = game.player.y + 1;
-	newX = game.player.x + 1;
+	newY = game.player.point.y + 1;
+	newX = game.player.point.x + 1;
 	
 	var newSpace = game.map.floors[game.player.floor][newX][newY];
 	
 	if(newSpace.tile.passable)
 	{
-		game.player.x++;
-		game.player.y++;
+		game.player.point.x++;
+		game.player.point.y++;
 		game.player.sprite.y += 12;
 		game.player.sprite.x += 12;
+		recalculateFOV(game.player.floor);
 	}
 }

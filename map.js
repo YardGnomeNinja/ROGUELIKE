@@ -19,10 +19,16 @@ function initMap() {
 
 	game.map.max_room_count = 50;
 
+	game.map.fog = {};
+	game.map.fog.spriteIndex = 1;
+	
 	initMapPrototypes();
 
 	// Create the first floor
 	game.map.floors[0] = generateFloor(0);
+	
+	// Fill the first floor with tiles
+	fillFloor(0);
 }
 
 function initMapPrototypes() {
@@ -32,9 +38,12 @@ function initMapPrototypes() {
 	}
 
 	game.map.space = function (x, y) {
+		var x = (typeof x === "undefined") ? 0 : x;
+		var y = (typeof y === "undefined") ? 0 : y;
+
 		this.__proto__ = new Object();
-		this.x = (typeof x === "undefined") ? 0 : x;
-		this.y = (typeof y === "undefined") ? 0 : y;
+		this.point = new Phaser.Point(x, y);
+		this.explored = false;
 		this.tile = new Object();
 		this.creature = new Object();
 		this.items = new Array();
@@ -47,32 +56,39 @@ function initMapPrototypes() {
 		this.connected = false;
 	}
 
-	game.map.tile = function (name, width, height, sprite, passable, blocksFOV) {
+	game.map.tile = function (name, width, height, spriteIndex, defaultTint, passable, blocksFOV) {
 		this.__proto__ = new Object();
 		this.name = (typeof name === "undefined") ? 'unknown' : name;
 		this.width = (typeof width === "undefined") ? game.map.tiles.default_width : width;
 		this.height = (typeof height === "undefined") ? game.map.tiles.default_height : height;
-		this.sprite = (typeof sprite === "undefined") ? 2 : sprite;
-		this.passable = (typeof passable === "undefined") ? false : passable;
-		this.blocksFOV = (typeof blocksFOV === "undefined") ? true : blocksFOV;
+		this.sprite = {};
+		this.spriteIndex = (typeof spriteIndex === "undefined") ? 3 : spriteIndex; // default to wall
+		this.defaultTint = 0xFFFFFF; // white by default
+		this.passable = (typeof passable === "undefined") ? false : passable; // default to wall
+		this.blocksFOV = (typeof blocksFOV === "undefined") ? true : blocksFOV; // default to wall
 	}
 
 	game.map.groundTile = function (x, y) {
+		var x = (typeof x === "undefined") ? 0 : x;
+		var y = (typeof y === "undefined") ? 0 : y;
+
 		this.__proto__ = new game.map.tile();
 		this.name = 'stone floor';
-		this.x = (typeof x === "undefined") ? 0 : x;
-		this.y = (typeof y === "undefined") ? 0 : y;
-		this.sprite = 0;
+		this.point = new Phaser.Point(x, y);
+		this.spriteIndex = 0;
 		this.passable = true;
 		this.blocksFOV = false;
 	}
 
 	game.map.wallTile = function (x, y) {
+		var x = (typeof x === "undefined") ? 0 : x;
+		var y = (typeof y === "undefined") ? 0 : y;
+
 		this.__proto__ = new game.map.tile();
 		this.name = 'stone wall';
-		this.x = (typeof x === "undefined") ? 0 : x;
-		this.y = (typeof y === "undefined") ? 0 : y;
-		this.sprite = 2;
+		this.point = new Phaser.Point(x, y);
+		this.spriteIndex = 2;
+		this.defaultTint = 0xABABAB; // white by default
 		this.passable = false;
 		this.blocksFOV = true;
 	}
@@ -248,20 +264,55 @@ function carveRight(floor, pointA, pointB) {
 	}
 }
 
-function drawFloor(index)
+function fillFloor(floor)
 {
-	// Draw the floor
+	// Fill the tiles with sprites
 	for(var x = 0; x < game.map.max_width; x++)
 	{
 		for(var y = 0; y < game.map.max_height; y++)
 		{
-			// Get the tile at this location
-			var thisSpaceTile = game.map.floors[index][x][y].tile;
+			// Get the space at this location
+			var thisSpace = game.map.floors[floor][x][y];
+			
+			thisSpace.tile.sprite = game.add.sprite(x * thisSpace.tile.width, y * thisSpace.tile.height, 'sprites', thisSpace.tile.spriteIndex);
 
-			// Draw the tile sprite
-			var newTileSprite = game.add.sprite(x * thisSpaceTile.width, y * thisSpaceTile.height, 'sprites', thisSpaceTile.sprite);
-			newTileSprite.inputEnabled = true;
-			newTileSprite.events.onInputDown.add(onTileSpriteClick, this);
+			// Add click input for debugging
+			thisSpace.tile.sprite.inputEnabled = true;
+			thisSpace.tile.sprite.events.onInputDown.add(onTileSpriteClick, this);			
 		}
 	}	
+}
+
+function refreshFloor(floor) {
+	// Refresh the floor
+	for(var x = 0; x < game.map.max_width; x++)
+	{
+		for(var y = 0; y < game.map.max_height; y++)
+		{
+			// Get the space at this location
+			var thisSpace = game.map.floors[floor][x][y];
+
+			if(game.player.visibleSpaces.indexOf(thisSpace.point) != -1)
+			{
+				// If the player has seen the space, it is "explored"
+				thisSpace.explored = true;
+				
+				thisSpace.tile.sprite.tint = thisSpace.tile.defaultTint;
+				thisSpace.tile.sprite.exists = true;
+			}
+			else
+			{
+				// If the space has been explored, draw the sprite, but a darker version of it
+				if(thisSpace.explored)
+				{
+					thisSpace.tile.sprite.tint = thisSpace.tile.defaultTint - 0x888888;
+					thisSpace.tile.sprite.exists = true;
+				}
+				else
+				{
+					thisSpace.tile.sprite.exists = false;
+				}
+			}
+		}
+	}
 }

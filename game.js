@@ -16,13 +16,9 @@ function create () {
 	initMap();
 	initPlayer();	
 	initInput();
-	
-	// Draw the first floor
-	drawFloor(0);
 }
 
 function update () {
-	
 }
 
 function render() {
