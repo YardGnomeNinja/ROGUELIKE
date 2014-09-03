@@ -5,7 +5,7 @@
 var game = new Phaser.Game(1024, 768, Phaser.AUTO, 'Rogue-like', { preload: preload, create: create, update: update, render: render });
 
 function preload () {
-	 game.load.atlasJSONHash('sprites', 'sprites/default.png', 'sprites/default.jsona');
+	 game.load.atlasJSONHash('sprites', 'sprites/default.png', 'sprites/default.json');
 }
 
 function create () {
